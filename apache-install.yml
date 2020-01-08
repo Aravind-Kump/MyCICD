@@ -1,0 +1,28 @@
+---
+- name: Install and start apache
+  hosts: all
+  remote_user: aravind
+  become: yes
+  vars:
+    http_port: 80
+    max_clients: 200
+  remote_user: root
+
+  tasks:
+  - name: epel installation
+    yum: name=epel-release state=present
+  - name: Install python bindings for SELINUX
+    yum: name={item} state=present
+    with_items: 
+       - libselinux-python
+       - libsemanage-python
+    name: Checking the Selinux status
+    command: getenforce
+    register: sestatus
+    changed_when: false
+  - name: install httpd
+    yum: name/pkg=httpd state=latest
+  - name: write the config file
+    template: src=/srv/http.conf1 dest=/etc/httpd.conf1
+  - name: restart
+    service: name=httpd state=restarted enabled=yes

@@ -1,0 +1,30 @@
+---
+- name: Tomcat
+  hosts: dev
+  tasks:
+  - name: Check for Tomcat
+    shell: ./validate_tomcat.sh
+    register: output
+
+  - name: Install Tomcat
+    shell: ./install_tomcat.sh
+  
+  - name: Simple GET operation
+    aws_s3:
+      aws_access_key: <Access Key> 
+      aws_secret_key: <Secret Key>
+      bucket: mybucket
+      object: ${var.buildID}.war
+      dest: /opt/apache/webapps/
+      mode: get
+
+  - name: Deploying the war to the webapps.
+    shell: ./deploy.sh
+
+  - name: Check that a page returns a status 200 and fail if the word AWESOME is not in the page contents
+    uri:
+      url: http://localhost:8080/${var.buildID}
+      return_content: yes
+      register: this
+      failed_when: "'AWESOME' not in this.content"
+  

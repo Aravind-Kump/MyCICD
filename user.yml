@@ -1,0 +1,13 @@
+---
+- name: Userkey configuration
+  hosts: localhost
+  become: yes
+  vars:
+   pubkeys: 123
+
+  tasks:
+   - name: test
+     command:  "{{item}}"
+     with_items:
+     - sai
+     template: src:/root/user_keys/"{{item}}"
